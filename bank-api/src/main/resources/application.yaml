@@ -1,0 +1,61 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: bank-api
+
+  # Database Configuration
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  # jpa
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        format_sql: true
+
+  # h2
+  h2:
+    console:
+      enabled: true # /h2-console 이쪽 경로
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 5000ms
+
+logging:
+  level:
+    com.example.bank: INFO # (INFO , WARN , ERROR)
+    io.github.resilience4j : DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+    endpoint:
+      health:
+        show-details: always
+      prometheus:
+        enabled: true
+      metrics:
+        enabled: true
+# 기본 swagger-ui url이 아닌 내부 명시를 하는 경우 따로 명시 가능
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationSorter: method
+  packages-to-scan: com.lecture.bank.api
+  paths-to-math: /api/**
