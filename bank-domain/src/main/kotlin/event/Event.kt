@@ -5,6 +5,8 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID
 
+// bank-evnet의 EventPublisher에서 사용하는 Event
+
 // 기본 도메인 이벤트 인터페이스
 interface DomainEvent {
     val occurredOn: LocalDateTime

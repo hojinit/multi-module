@@ -12,18 +12,20 @@ import com.lecture.bank.domain.repository.TransactionRepository
 import com.lecture.bank.monitoring.metrics.BankMetrics
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
+import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
-import org.springframework.retry.annotation.Backoff
 import java.math.BigDecimal
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
 
+// Consumer (Event Listener 용어는 잘 사용 안함)
 
 @Component
 class EventReader(
+    // event를 받아 data를 넣어야 하기 때문에 domain(repository) 설정 필요
     private val accountReadViewRepository: AccountReadViewRepository,
     private val transactionReadViewRepository: TransactionReadViewRepository,
     private val accountRepository: AccountRepository,
@@ -32,12 +34,12 @@ class EventReader(
     private val txAdvice: TxAdvice
 ) {
     private val logger = LoggerFactory.getLogger(EventReader::class.java)
-
+    // AOP 관점에서 사용하기 편하도록 관리
     @EventListener
     @Async("taskExecutor")
     @Retryable(value = [Exception::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun handleAccountCreated(event : AccountCreatedEvent) {
-        // API Main -> Publish (TaskExcutor) -> RetryProxy  -> Method -> RetryProxy(1초 대기) -> Method
+        // API Main -> Publish (TaskExcutor) -> RetryProxy  -> Method(handleAccountCreated) -> RetryProxy(1초 대기) -> Method
         val startTime = Instant.now()
         val eventType = "AccountCreatedEvent"
 
@@ -77,7 +79,7 @@ class EventReader(
 
     @EventListener
     @Async("taskExecutor")
-    @Retryable(value = [Exception::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+    @Retryable(value = [Exception::class], maxAttempts = 3, backoff = Backoff(delay = 1000))    // exception 발생 시 재실행
     fun handleTransactionCreated(event : TransactionCreatedEvent) {
         val startTime = Instant.now()
         val eventType = "TransactionCreatedEvent"
