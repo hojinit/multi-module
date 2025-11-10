@@ -9,7 +9,7 @@ import java.math.BigDecimal
 import java.util.Optional
 
 @Repository
-interface AccountReadViewRepository : JpaRepository<AccountReadView, Long> {
+interface  AccountReadViewRepository : JpaRepository<AccountReadView, Long> {
     fun findByAccountNumber(accountNumber: String): Optional<AccountReadView>
     
     @Query("SELECT a FROM AccountReadView AS a ORDER BY a.balance DESC")

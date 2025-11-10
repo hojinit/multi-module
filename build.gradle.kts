@@ -41,6 +41,7 @@ subprojects {
         apply(plugin = "org.jetbrains.kotlin.plugin.spring")
     }
 
+    // repository
     the<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension>().apply {
         imports {
             mavenBom("org.springframework.boot:spring-boot-dependencies:3.2.3")

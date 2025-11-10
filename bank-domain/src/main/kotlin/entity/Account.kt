@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 @Table(name = "accounts")
 data class Account(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // key auto-generated
     val id : Long = 0,
 
     @Column(nullable = false, unique = true)

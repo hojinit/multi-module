@@ -1,19 +1,14 @@
 package com.lecture.bank.api
 
 import com.lecture.bank.common.ApiResponse
-import com.lecture.bank.domain.repository.TransactionRepository
 import com.lecture.bank.service.AccountWriteService
 import dto.AccountView
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
-import org.slf4j.LoggerFactory
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
 import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse
 

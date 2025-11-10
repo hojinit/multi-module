@@ -16,7 +16,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
     // swagger
-
+    // OpenAPI는 RESTful API를 기술하기 위한 표준 사양(Specification) > 무엇을(what)
+    // Swagger는 이 OpenAPI 사양을 기반으로 API 문서를 생성하고 시각화하며 테스트하는 데 사용되는 도구 모음 > 어떻게(how)
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
 
     // circuit
