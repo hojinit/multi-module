@@ -1,19 +1,28 @@
 package com.lecture.bank.monitoring.metrics
 
-import io.micrometer.core.instrument.*
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.DistributionSummary
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.Timer
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
-import java.util.concurrent.atomic.AtomicLong
 import java.time.Duration
+import java.util.concurrent.atomic.AtomicLong
+
+// 모니터링 대표적으로는 Datadog, kibana, Granfana
+// 디버깅 시 트래픽 유형을 metric 형태로 구성 하여 트래픽 유형 분석 가능
 
 @Component
-class BankMetrics(private val meterRegistry: MeterRegistry) {
+class BankMetrics(private val meterRegistry: MeterRegistry) { //MeterRegistry : Micrometer의 주요한 interface, metric 등록 및 관리
+    // 단일 instance여서 계좌 수의 대한 게이지(실시간 변동하는 단일 값을 추적하는 metric) 누적, 단일이여서 Atomic으로 사용
     private val accountGauge = AtomicLong(0)
 
     init {
+        // class 초기화 시 게이지를 메트릭에 등록하고 관리, accountGauge 모니터링
         meterRegistry.gauge("bank.account.total", accountGauge) {it.get().toDouble()}
     }
 
+    // account Count가 생성 될 시 사용할 메트릭 정보 생성
     fun incrementAccountCreated() {
         Counter.builder("bank.account.created").description("Number of accounts created").register(meterRegistry).increment()
     }
@@ -25,12 +34,14 @@ class BankMetrics(private val meterRegistry: MeterRegistry) {
     fun incrementTransaction(type: String) {
         Counter.builder("bank.transaction.count")
             .description("Number of transactions")
-            .tag("type", type)
+            .tag("type", type)  // cf. tag가 붙게 되면 메타 데이터가 커지게 되니 유의해야 함, 태그로 분석을 사용하지는 않음
             .register(meterRegistry)
             .increment()
     }
 
     fun recordTransactionAmount(amount: BigDecimal, type: String) {
+        // DistributionSummary : 분포 요약이라는 메트릭에 기록하게 됨
+        // 값의 분포 (최소값, 최대값, 평균 등)이기에 특정 금액이나 수량 분석 시 유용
         DistributionSummary.builder("bank.transaction.amount")
             .description("Transaction amounts distribution")
             .tag("type", type)
@@ -65,6 +76,7 @@ class BankMetrics(private val meterRegistry: MeterRegistry) {
     }
 
     fun recordEventProcessingTime(duration: Duration, eventType: String) {
+        // 시간 계산 시 사용
         Timer.builder("bank.event.processing.time")
             .description("Event processing time")
             .tag("type", eventType)
