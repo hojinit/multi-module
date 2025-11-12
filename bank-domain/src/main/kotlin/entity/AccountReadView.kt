@@ -9,6 +9,7 @@ import java.time.LocalDateTime
 
 @Entity
 @Table(name = "account_read_views")
+// data 명시를 통해 copy, save 함수 사용 가능
 data class AccountReadView(
     @Id
     val id: Long = 0,

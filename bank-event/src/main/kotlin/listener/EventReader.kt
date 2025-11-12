@@ -22,7 +22,6 @@ import java.time.Instant
 import java.time.LocalDateTime
 
 // Consumer (Event Listener 용어는 잘 사용 안함)
-
 @Component
 class EventReader(
     // event를 받아 data를 넣어야 하기 때문에 domain(repository) 설정 필요
@@ -40,12 +39,13 @@ class EventReader(
     @Retryable(value = [Exception::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun handleAccountCreated(event : AccountCreatedEvent) {
         // API Main -> Publish (TaskExcutor) -> RetryProxy  -> Method(handleAccountCreated) -> RetryProxy(1초 대기) -> Method
-        val startTime = Instant.now()
+        val startTime = Instant.now()   //UNIX
         val eventType = "AccountCreatedEvent"
 
         logger.info("event received $eventType")
-
+        // txAdvice만으로 query  작업
         try {
+            // new transaction
             txAdvice.runNew {
                 val account = accountRepository.findById(event.accountId).orElseThrow {
                     IllegalStateException("Account with id ${event.accountId} not found")
@@ -68,11 +68,11 @@ class EventReader(
             }
 
             val duration = Duration.between(startTime, Instant.now())
-            bankMetrics.recordEventProcessingTime(duration, eventType)
-            bankMetrics.incrementEventProcessed(eventType)
+            bankMetrics.recordEventProcessingTime(duration, eventType)  // record
+            bankMetrics.incrementEventProcessed(eventType)  // success
         } catch (e: Exception) {
             logger.error("Error occurred while processing $eventType", e)
-            bankMetrics.incrementEventFailed(eventType)
+            bankMetrics.incrementEventFailed(eventType) // fail
             throw e
         }
     }

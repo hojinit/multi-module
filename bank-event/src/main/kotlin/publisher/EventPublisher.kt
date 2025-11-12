@@ -19,7 +19,7 @@ interface EventPublisher {
 class EventPublisherImpl(
     // ApplicationEventPublisher : app 내에서 event 개시 (Redis, Kafka로 추후 분리 가능)
     private val eventPublisher : ApplicationEventPublisher,
-    //
+    // BankMetrics 사용
     private val metrics : BankMetrics,
 ) : EventPublisher {
     private val logger = LoggerFactory.getLogger(EventPublisherImpl::class.java)
@@ -28,10 +28,8 @@ class EventPublisherImpl(
     // Kafka의 topic, Redis의 key
 
     // cf. 여기는 하나의 instance에서 구현이라 Queue로 보관 없음
-
     override fun publish(event : DomainEvent) {
         logger.info("Publishing event: $event")
-
         try {
             eventPublisher.publishEvent(event)
             metrics.incrementEventPublished(event::class.simpleName!! ?: "Unknown")
