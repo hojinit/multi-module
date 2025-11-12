@@ -13,12 +13,9 @@ import com.lecture.bank.domain.repository.AccountRepository
 import com.lecture.bank.domain.repository.TransactionRepository
 import com.lecture.bank.event.publisher.EventPublisher
 import com.lecture.bank.monitoring.metrics.BankMetrics
-//import com.sun.org.slf4j.internal.LoggerFactory
-// TODo
-import org.slf4j.LoggerFactory
 import dto.AccountView
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry
-import org.springframework.beans.factory.annotation.Autowired
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -56,7 +53,7 @@ class AccountWriteService (
 
                 bankMetrics.incrementAccountCreated()
                 bankMetrics.updateAccountCount(accountRepository.count())
-
+                // CQRS 패턴 적용
                 eventPublisher.publishAsync(
                     AccountCreatedEvent(
                         accountId =  account.id,
@@ -90,6 +87,7 @@ class AccountWriteService (
         return breaker.execute(
             operation = {
                 lockService.executeWithTransactionLock(fromAccount, toAccount) {
+                    // 거래 순서대로 FIFO 처리 가능
                     transferInternal(fromAccount,toAccount, amount)
                 }
             },
@@ -130,6 +128,7 @@ class AccountWriteService (
             val savedFromAccount = accountRepository.save(fromAcct)
             val savedToAccount = accountRepository.save(toAcct)
 
+            // transactin event 동시 처리
             val fromTransaction = Transaction(
                 account = fromAcct,
                 amount = amount,
@@ -151,19 +150,21 @@ class AccountWriteService (
             bankMetrics.incrementTransaction("TRANSFER")
             bankMetrics.incrementTransaction("TRANSFER")
 
-            return@run Pair(
+            return@run Pair(    // Pair
                 listOf(
+                    // Triple을 원할 경우 amount 등 input 하나 더 추가 필요
+                    // Tuple은 오류 발생
                     Pair(fromSavedTransaction, savedFromAccount),
                     Pair(savedToTransaction, savedToAccount)
                 ),
                 null
             )
         }!!
-
+        // first : Pair의 처음
         if (transactionResult.first == null) {
             return ApiResponse.error(transactionResult.second!!)
         }
-
+        // event 처리는 transaction이 커밋 이후에 처리 되어야 함
         transactionResult.first!!.forEach { (savedTransaction, savedAccount) ->
             eventPublisher.publishAsync(
                 TransactionCreatedEvent(

@@ -15,6 +15,7 @@ interface EventPublisher {
     fun publishAllAsync(events : List<DomainEvent>)
 }
 // evnet 전송 > listener 에서 event 처리
+// Read View를 최신 상태로 유지
 @Component
 class EventPublisherImpl(
     // ApplicationEventPublisher : app 내에서 event 개시 (Redis, Kafka로 추후 분리 가능)

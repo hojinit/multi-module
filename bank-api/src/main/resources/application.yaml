@@ -7,20 +7,24 @@ spring:
 
   # Database Configuration
   datasource:
+    #h2: DB를 in memory로 사용 (일시적 사용)
+    #DB_CLOSE_DELAY : app이 종료되어도 db와 연결
+    #DB_CLOSE_ON_EXIT : JVM이 종료되어도 dB를 닫지 않음
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
-    username: sa
+    username: sa  #system admin
     password:
 
   # jpa
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create-drop # hibernate가 app 시작 시 db에 schema 자동 생성 및 종료 시 자동 삭제
+      #현재 h2를 사용하기 때문에 create-drop기능 사용
     show-sql: true
     database-platform: org.hibernate.dialect.H2Dialect
     properties:
       hibernate:
-        format_sql: true
+        format_sql: true # console창에 SQL 로그 좀 더 정렬되어서 나옴
 
   # h2
   h2:
@@ -35,6 +39,7 @@ spring:
 
 logging:
   level:
+    # 해당 LOG 이상만 호출
     com.example.bank: INFO # (INFO , WARN , ERROR)
     io.github.resilience4j : DEBUG
 
@@ -42,6 +47,8 @@ management:
   endpoints:
     web:
       exposure:
+        # Actuator에 대해 외부에 노출하는 API 지정
+        # ex. http://localhost:9090/actuator/health
         include: health,info,metrics,prometheus
     endpoint:
       health:
